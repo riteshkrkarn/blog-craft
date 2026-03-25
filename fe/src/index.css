@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-label: "Inter", sans-serif;
+
+  --color-surface: #f7f9fb;
+  --color-surface-container-low: #f2f4f6;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e6e8ea;
+  --color-surface-container-highest: #e0e3e5;
+  --color-surface-bright: #f7f9fb;
+
+  --color-primary: #4d41df;
+  --color-primary-container: #675df9;
+  --color-secondary: #0057c2;
+  --color-tertiary: #914800;
+  --color-tertiary-container: #b65c00;
+
+  --color-on-surface: #191c1e;
+  --color-on-surface-variant: #464555;
+  --color-outline: #777587;
+  --color-outline-variant: rgba(119, 117, 135, 0.2);
+
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-body antialiased;
+  }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.ghost-border {
+  outline: 1px solid var(--color-outline-variant);
+}
+
+.prose h2 {
+  @apply font-headline text-3xl font-bold mb-6 text-on-surface;
+}
+
+.prose p {
+  @apply text-lg text-on-surface-variant leading-relaxed mb-6;
+}
