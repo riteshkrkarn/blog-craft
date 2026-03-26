@@ -1,47 +1,84 @@
 """
 BlogCraft AI — LLM Client Initialization
-Provides pre-configured LangChain chat model instances for OpenAI and Gemini.
+Routes all model calls through Metric AI proxy clients.
 """
 
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
-from langchain_google_genai import ChatGoogleGenerativeAI
+import asyncio
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-env_path = Path(__file__).parent / ".env"
-load_dotenv(env_path, override=True)
+from metric_setup import metric_client
+
+
+class MetricProxyLLM:
+    def __init__(self, provider: str, model: str, temperature: float):
+        self.provider = provider
+        self.model = model
+        self.temperature = temperature
+
+    def _messages_to_payload(self, messages):
+        payload = []
+        for msg in messages:
+            if isinstance(msg, SystemMessage):
+                role = "system"
+            elif isinstance(msg, HumanMessage):
+                role = "user"
+            else:
+                role = "assistant"
+            payload.append({"role": role, "content": msg.content})
+        return payload
+
+    def invoke(self, messages):
+        payload = self._messages_to_payload(messages)
+
+        if self.provider == "gemini":
+            response = metric_client.proxy.gemini.generate_content(
+                model=self.model,
+                messages=payload,
+            )
+            completion_text = getattr(response, "completion_text", None) or str(response)
+            return AIMessage(content=completion_text)
+
+        response = metric_client.proxy.openai.chat_completions(
+            model=self.model,
+            messages=payload,
+            temperature=self.temperature,
+        )
+        completion_text = getattr(response, "completion_text", None) or str(response)
+        return AIMessage(content=completion_text)
+
+    async def ainvoke(self, messages):
+        return await asyncio.to_thread(self.invoke, messages)
 
 # ─────────────────────────────────────────────
 # OpenAI Models
 # ─────────────────────────────────────────────
 
-openai_fast = ChatOpenAI(
+openai_fast = MetricProxyLLM(
+    provider="openai",
     model="gpt-4o-mini",
     temperature=0.7,
-    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
-openai_strong = ChatOpenAI(
+openai_strong = MetricProxyLLM(
+    provider="openai",
     model="gpt-4.1-mini",
     temperature=0.3,
-    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
 # ─────────────────────────────────────────────
 # Google Gemini Models
 # ─────────────────────────────────────────────
 
-gemini_fast = ChatGoogleGenerativeAI(
+gemini_fast = MetricProxyLLM(
+    provider="gemini",
     model="gemini-2.5-flash",
     temperature=0.7,
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
 )
 
-gemini_strong = ChatGoogleGenerativeAI(
+gemini_strong = MetricProxyLLM(
+    provider="gemini",
     model="gemini-2.5-pro",
     temperature=0.3,
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
 )
 
 # ─────────────────────────────────────────────
