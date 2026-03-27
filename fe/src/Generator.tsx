@@ -17,7 +17,10 @@ import {
 // API base URL
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-const API_BASE = "http://localhost:8000/api";
+const LOCAL_API_BASE = "http://localhost:8000/api";
+const RAW_API_BASE =
+  import.meta.env.VITE_API_BASE_URL?.trim() || LOCAL_API_BASE;
+const API_BASE = RAW_API_BASE.replace(/\/$/, "");
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // Shared UI Components (matching landing page theme)
@@ -70,7 +73,13 @@ const Card = ({
   </div>
 );
 
-const BackButton = ({ onClick, label = "Back" }: { onClick: () => void; label?: string }) => (
+const BackButton = ({
+  onClick,
+  label = "Back",
+}: {
+  onClick: () => void;
+  label?: string;
+}) => (
   <button
     onClick={onClick}
     className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-headline font-semibold text-sm mb-8"
@@ -95,7 +104,13 @@ const LoadingSpinner = ({ message }: { message: string }) => (
   </motion.div>
 );
 
-const ErrorMessage = ({ message, onRetry }: { message: string; onRetry?: () => void }) => (
+const ErrorMessage = ({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) => (
   <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
     <p className="text-red-600 font-medium mb-4">{message}</p>
     {onRetry && (
@@ -143,10 +158,14 @@ interface InputPageProps {
 }
 
 const InputPage = ({
-  topic, setTopic,
-  audience, setAudience,
-  wordCount, setWordCount,
-  insights, setInsights,
+  topic,
+  setTopic,
+  audience,
+  setAudience,
+  wordCount,
+  setWordCount,
+  insights,
+  setInsights,
   setProjectId,
   setStrategies,
   onNext,
@@ -199,7 +218,8 @@ const InputPage = ({
           Craft Your Blog
         </h1>
         <p className="text-on-surface-variant text-lg">
-          Set the foundational parameters for your article. Our AI engine will handle the structural logic.
+          Set the foundational parameters for your article. Our AI engine will
+          handle the structural logic.
         </p>
       </div>
 
@@ -307,18 +327,23 @@ const StrategyPage = ({
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/projects/${projectId}/strategies/select`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ strategy_id: selectedId }),
-      });
+      const res = await fetch(
+        `${API_BASE}/projects/${projectId}/strategies/select`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ strategy_id: selectedId }),
+        },
+      );
 
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.detail || "Failed to select strategy");
       }
 
-      const outlineRes = await fetch(`${API_BASE}/projects/${projectId}/outline`);
+      const outlineRes = await fetch(
+        `${API_BASE}/projects/${projectId}/outline`,
+      );
       if (!outlineRes.ok) throw new Error("Failed to fetch outline");
       const outlineData = await outlineRes.json();
 
@@ -335,9 +360,12 @@ const StrategyPage = ({
     setRegenerating(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/projects/${projectId}/strategies/regenerate`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `${API_BASE}/projects/${projectId}/strategies/regenerate`,
+        {
+          method: "POST",
+        },
+      );
       if (!res.ok) throw new Error("Failed to regenerate strategies");
       const data = await res.json();
       setStrategies(data.strategies);
@@ -365,7 +393,8 @@ const StrategyPage = ({
           Choose Your Strategy
         </h1>
         <p className="text-on-surface-variant text-lg">
-          Our AI generated 3 unique approaches. Select the one that best fits your vision.
+          Our AI generated 3 unique approaches. Select the one that best fits
+          your vision.
         </p>
       </div>
 
@@ -376,12 +405,13 @@ const StrategyPage = ({
           <Card
             key={s.id}
             className={`p-6 cursor-pointer transition-all hover:shadow-lg ${
-              selectedId === s.id
-                ? "outline-2! outline-primary! shadow-lg"
-                : ""
+              selectedId === s.id ? "outline-2! outline-primary! shadow-lg" : ""
             }`}
           >
-            <div onClick={() => setSelectedId(s.id)} className="flex items-start gap-4">
+            <div
+              onClick={() => setSelectedId(s.id)}
+              className="flex items-start gap-4"
+            >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 transition-colors ${
                   selectedId === s.id
@@ -420,7 +450,8 @@ const StrategyPage = ({
           disabled={selectedId === null}
           className="flex-1 py-5 text-lg"
         >
-          Lock Strategy & Generate Outline <ArrowRight className="w-5 h-5 ml-2" />
+          Lock Strategy & Generate Outline{" "}
+          <ArrowRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
     </motion.div>
@@ -456,9 +487,12 @@ const OutlinePage = ({
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/projects/${projectId}/outline/approve`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `${API_BASE}/projects/${projectId}/outline/approve`,
+        {
+          method: "POST",
+        },
+      );
 
       if (!res.ok) {
         const err = await res.json();
@@ -477,14 +511,17 @@ const OutlinePage = ({
     setRegenerating(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/projects/${projectId}/outline/regenerate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          paragraph_numbers: null,
-          feedback: feedback || null,
-        }),
-      });
+      const res = await fetch(
+        `${API_BASE}/projects/${projectId}/outline/regenerate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paragraph_numbers: null,
+            feedback: feedback || null,
+          }),
+        },
+      );
       if (!res.ok) throw new Error("Failed to regenerate outline");
       const data = await res.json();
       setOutline(data.outline);
@@ -531,7 +568,10 @@ const OutlinePage = ({
                 </h3>
                 <ul className="space-y-1 mb-3">
                   {item.key_points.map((point, i) => (
-                    <li key={i} className="text-on-surface-variant text-sm flex items-start gap-2">
+                    <li
+                      key={i}
+                      className="text-on-surface-variant text-sm flex items-start gap-2"
+                    >
                       <ChevronRight className="w-3 h-3 mt-1 text-primary shrink-0" />
                       {point}
                     </li>
@@ -593,7 +633,9 @@ interface ResultPageProps {
 }
 
 const ResultPage = ({ projectId, onBack }: ResultPageProps) => {
-  const [resultFormat, setResultFormat] = useState<"markdown" | "html">("markdown");
+  const [resultFormat, setResultFormat] = useState<"markdown" | "html">(
+    "markdown",
+  );
   const [copied, setCopied] = useState(false);
   const [markdownContent, setMarkdownContent] = useState("");
   const [htmlContent, setHtmlContent] = useState("");
@@ -629,7 +671,8 @@ const ResultPage = ({ projectId, onBack }: ResultPageProps) => {
     fetchExport();
   }, [projectId]);
 
-  const currentOutput = resultFormat === "markdown" ? markdownContent : htmlContent;
+  const currentOutput =
+    resultFormat === "markdown" ? markdownContent : htmlContent;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentOutput);
@@ -661,7 +704,8 @@ const ResultPage = ({ projectId, onBack }: ResultPageProps) => {
             Blog Generation Complete
           </h1>
           <p className="text-on-surface-variant mt-2">
-            Your structured, logical blog post is ready. Copy in your preferred format.
+            Your structured, logical blog post is ready. Copy in your preferred
+            format.
           </p>
         </div>
       </div>
