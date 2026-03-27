@@ -35,6 +35,19 @@ def _parse_json(text: str) -> dict:
     return json.loads(text)
 
 
+def _normalize_outline_item(item: dict) -> dict:
+    """Normalize LLM outline payload fields before Pydantic validation."""
+    normalized = dict(item)
+    insight = normalized.get("user_insight_used")
+
+    if isinstance(insight, bool):
+        normalized["user_insight_used"] = "Provided" if insight else None
+    elif insight is not None and not isinstance(insight, str):
+        normalized["user_insight_used"] = str(insight)
+
+    return normalized
+
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Step 1: Strategist
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -107,7 +120,7 @@ async def generate_outline(state: dict) -> dict:
     ])
 
     data = _parse_json(response.content)
-    outline = [ParagraphOutlineItem(**p) for p in data["outline"]]
+    outline = [ParagraphOutlineItem(**_normalize_outline_item(p)) for p in data["outline"]]
 
     return {
         "outline": outline,
@@ -143,7 +156,7 @@ async def regenerate_outline_partial(
     ])
 
     data = _parse_json(response.content)
-    new_outline = [ParagraphOutlineItem(**p) for p in data["outline"]]
+    new_outline = [ParagraphOutlineItem(**_normalize_outline_item(p)) for p in data["outline"]]
 
     return {
         "outline": new_outline,
