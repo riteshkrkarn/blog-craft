@@ -9,9 +9,8 @@ Backend for BlogCraft built with FastAPI, LangGraph, and LLM integrations.
 
 ## Install
 
-```bash
-pip install -r requirement.txt
-```
+````bash
+pip install -r requirements.txt```
 
 ## Environment
 
@@ -22,7 +21,7 @@ OPENAI_API_KEY=...
 GOOGLE_API_KEY=...
 METRICAI_API_KEY=...
 METRICAI_FIREBASE_TOKEN=...
-```
+````
 
 ## Run Locally
 
@@ -32,5 +31,5 @@ uvicorn main:app --reload --port 8000
 
 ## Deploy (Render)
 
-- Build command: `pip install -r requirement.txt`
+- Build command: `pip install -r requirements.txt`
 - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
