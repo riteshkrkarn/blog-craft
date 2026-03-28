@@ -34,7 +34,3 @@ uvicorn main:app --reload --port 8000
 
 - Build command: `pip install -r requirement.txt`
 - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-
-## API Base
-
-All endpoints are under `/api` (for example: `/api/projects`).
